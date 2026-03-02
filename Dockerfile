@@ -5,7 +5,9 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     zip \
-    && docker-php-ext-install zip
+    curl \
+    libpq-dev \
+    && docker-php-ext-install zip pdo pdo_pgsql
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -14,6 +16,10 @@ WORKDIR /app
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
+
+RUN php artisan migrate --force
+
+RUN chmod -R 775 storage bootstrap/cache
 
 EXPOSE 10000
 
